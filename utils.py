@@ -27,7 +27,6 @@ def remove_low_high(im_input):
     im_output[im_input > high] = high
     return im_output
 
-#标准化输入
 def normalize(im_input):
     x_start = im_input.shape[0] // 4
     x_range = im_input.shape[0] // 2
@@ -73,12 +72,10 @@ def read_label(path, is_training=True):
 
     return final_label
 
-#读取金标准
 def read_seg(path):
     seg = nib.load(glob.glob(os.path.join(path, '*_seg.nii.gz'))[0]).get_data().astype(np.float32)
     return seg
 
-##读取4个模态的原始数据和金标准
 def read_image(path, is_training=True):
     t1 = nib.load(glob.glob(os.path.join(path, '*_t1.nii.gz'))[0]).get_data().astype(np.float32)
     t1ce = nib.load(glob.glob(os.path.join(path, '*_t1ce.nii.gz'))[0]).get_data().astype(np.float32)
@@ -117,8 +114,7 @@ def read_patch(path):
     label[seg == 2, 2] = 1
     label[seg == 4, 3] = 1
     return image[..., :-1], label
-
-#产生patch的位置？    
+    
 def generate_patch_locations(patches, patch_size, im_size):
     nx = round((patches * 8 * im_size[0] * im_size[0] / im_size[1] / im_size[2]) ** (1.0 / 3)) #nx=round(20*8*240*240/240/155)=6
     ny = round(nx * im_size[1] / im_size[0]) #ny=round(6*240/240)=6
@@ -140,37 +136,33 @@ def generate_test_locations(patch_size, stride, im_size):
     z = np.arange(patch_size[2] / 2, im_size[2] + pad_z[0] + pad_z[1] - patch_size[2] / 2 + 1, stride_size_z)
     return (x, y, z), (pad_x, pad_y, pad_z)
 
-#打乱patch的位置，radius=4
+#radius=4
 def perturb_patch_locations(patch_locations, radius):
     x, y, z = patch_locations
     #生成均匀分布
-    x = np.rint(x + np.random.uniform(-radius, radius, len(x))) #[-4,4)随机采样，样本数为 6
-    y = np.rint(y + np.random.uniform(-radius, radius, len(y))) #[-4,4)随机采样，样本数为 6
-    z = np.rint(z + np.random.uniform(-radius, radius, len(z))) #[-4,4)随机采样，样本数为 4
+    x = np.rint(x + np.random.uniform(-radius, radius, len(x))) #[-4,4)numbers of sample are 6
+    y = np.rint(y + np.random.uniform(-radius, radius, len(y))) #[-4,4)numbers of sample are 6
+    z = np.rint(z + np.random.uniform(-radius, radius, len(z))) #[-4,4)numbers of sample are 4
     return x, y, z
 
-#根据标签位置生成patch指示
 def generate_patch_probs(path, patch_locations, patch_size, im_size):
     x, y, z = patch_locations
-    #获取标签数据的0维,load加载的是int16转换成float32
-    #seg = nib.load(glob.glob(os.path.join(path, '*_seg.nii.gz'))[0]).get_data().astype(np.float32) 
+    #int16 convert to float32
     seg = read_seg(path)
     p = []
     for i in range(len(x)):
         for j in range(len(y)):
             for k in range(len(z)):
-                #将patch的位置确定在标签的位置
-                patch = seg[int(x[i] - patch_size / 2) : int(x[i] + patch_size / 2), #为什么要在+/-patch_size/2区间内，三维的patch是64*64*64
-                            int(y[j] - patch_size / 2) : int(y[j] + patch_size / 2), #保证每个维度的大小为64
+                patch = seg[int(x[i] - patch_size / 2) : int(x[i] + patch_size / 2), 
+                            int(y[j] - patch_size / 2) : int(y[j] + patch_size / 2), 
                             int(z[k] - patch_size / 2) : int(z[k] + patch_size / 2)]
                 patch = (patch > 0).astype(np.float32)
-                #不太懂
-                percent = np.sum(patch) / (patch_size * patch_size * patch_size) #获取灰度百分比
+                percent = np.sum(patch) / (patch_size * patch_size * patch_size) 
                 p.append((1 - np.abs(percent - 0.5)) * percent)
-    #p列表产生多个percent
+    #p list produce many percent
     p = np.asarray(p, dtype=np.float32)
-    p[p == 0] = np.amin(p[np.nonzero(p)]) #将p中为0的值替换为最小值
-    p = p / np.sum(p) #返回p中所有元素的和，求p中每个元素占总数的概率，
+    p[p == 0] = np.amin(p[np.nonzero(p)]) 
+    p = p / np.sum(p) 
     return p
 
 
