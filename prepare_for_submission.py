@@ -21,6 +21,13 @@ def clean_contour(prob, c_input):
     return c_input
 
 def batch_works(k):
+     input_path = " "
+    output_path = " " 
+    if not os.path.exists(output_path):
+        os.makedirs(output_path)   
+    all_paths = os.listdir(input_path)       
+    n_processes = cpu_count()
+    
     if k == n_processes - 1:
         paths = all_paths[k * int(len(all_paths) / n_processes) : ]
     else:
@@ -38,17 +45,7 @@ def batch_works(k):
         img = nib.Nifti1Image(seg, np.eye(4))
         nib.save(img, os.path.join(output_path, path.replace('_probs.npy', '.nii.gz')))
     
-if __name__ == '__main__':
-    if len(sys.argv) < 3:
-        raise Exception("Need at least the input and out data directory")
-    input_path = sys.argv[1]
-    output_path = sys.argv[2]
-    
-    if not os.path.exists(output_path):
-        os.makedirs(output_path)
-    
-    all_paths = os.listdir(input_path)
-            
+if __name__ == '__main__':         
     n_processes = cpu_count()
     pool = Pool(processes=n_processes)
     pool.map(batch_works, range(n_processes))
