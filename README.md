@@ -16,7 +16,7 @@ To train the model, run `python main.py --train=True --train_data_dir=train_patc
 
 To test the model on validation dataset, run `python main.py --train=False --deploy_data_dir=deploy_data_dir --deploy_output_dir=deploy_output_dir`. The results will be saved at `deploy_output_dir`. The network structure for survival prediction is not working good as the result is similar as random guessing. So you can ignore that by setting `run_survival` to `False`.<br/></br>
 
-To combine the results and generate the final label maps, run `python prepare_for_submission.py input_dir output_dir`.
+To combine the results and generate the final label maps, run `python prepare_for_submission.py`.
 
 ## Installation
 
