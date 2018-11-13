@@ -6,7 +6,7 @@ from nipype.interfaces.ants.segmentation import N4BiasFieldCorrection
 from skimage.transform import resize
 from multiprocessing import Pool, cpu_count
 
-#using n4 for bias_correction
+#using n4 for bias_correction for increasing image's gray and contrast
 def n4_correction(im_input):
     n4 = N4BiasFieldCorrection()
     n4.inputs.dimension = 3
@@ -16,7 +16,8 @@ def n4_correction(im_input):
     n4.inputs.n_iterations = [50, 50, 30, 20]
     n4.inputs.output_image = im_input.replace('.nii.gz', '_corrected.nii.gz')
     n4.run()
-
+    
+# k is in range(n_processes) and n_processes are core number of cpu
 def batch_works(k):
     input_path = "G:/brats18-master/Brats18/Brats18TrainingData"
     all_paths = []
@@ -31,8 +32,10 @@ def batch_works(k):
         paths = all_paths[k * int(len(all_paths) / n_processes) : (k + 1) * int(len(all_paths) / n_processes)]
         
     for path in paths:
+        n4_correction(glob.glob(os.path.join(path, '*_flair.nii.gz'))[0])
         n4_correction(glob.glob(os.path.join(path, '*_t1.nii.gz'))[0])
         n4_correction(glob.glob(os.path.join(path, '*_t1ce.nii.gz'))[0])
+        n4_correction(glob.glob(os.path.join(path, '*_t2.nii.gz'))[0])
     
 if __name__ == '__main__':  
     n_processes = cpu_count()    
