@@ -5,6 +5,7 @@ import numpy as np
 import pickle
 
 from utils import *
+from utils import read_patch, read_label, read_image, generate_test_locations
 
 def conv3d(input_, output_dim, f_size, is_training, scope='conv3d'):
     with tf.variable_scope(scope) as scope:
@@ -83,10 +84,11 @@ class UNet3D(object):
         self.loss_type = loss_type
         self.class_weights = class_weights
         self.patches_per_image = len(os.listdir(self.training_paths[0]))
-        
+       
         self.build_model()
-        
-        self.saver = tf.train.Saver(tf.trainable_variables() + tf.get_collection_ref('bn_collections'))
+        #self.saver = tf.train.Saver(tf.trainable_variables() + tf.get_collection_ref('bn_collections'))
+        #self.saver = tf.train.Saver()
+        self.saver = tf.train.Saver(tf.get_collection_ref('bn_collections'))
         
     def build_model(self):
         self.images = tf.placeholder(tf.float32, shape=[None, self.patch_size[0], self.patch_size[1], self.patch_size[2],
@@ -94,6 +96,7 @@ class UNet3D(object):
         self.labels = tf.placeholder(tf.float32, shape=[None, self.patch_size[0], self.patch_size[1], self.patch_size[2],
                                                         self.nclass], name='labels')
         self.is_training = tf.placeholder(tf.bool, name='is_training')
+        #dropout中保留神经元的概率
         self.keep_prob = tf.placeholder(tf.float32, name='dropout_ratio')
         
         conv_size = self.conv_size
@@ -195,9 +198,10 @@ class UNet3D(object):
         with tf.control_dependencies(update_ops):
             optimizer = tf.train.AdamOptimizer().minimize(self.loss)
         
-        self.sess.run(tf.global_variables_initializer())
+        self.sess.run(tf.global_variables_initializer()) #训练前初始化变量
         
         train_writer = tf.summary.FileWriter(os.path.join(self.log_dir, self.model_dir, 'train'), self.sess.graph)
+        #测试
         if self.testing_paths is not None:
             test_writer = tf.summary.FileWriter(os.path.join(self.log_dir, self.model_dir, 'test'))
             testing_orders = [(n, l) for n in range(len(self.testing_paths)) for l in range(self.patches_per_image)]
@@ -245,16 +249,17 @@ class UNet3D(object):
         # Save in the end
         self.save(counter)
        
-    def deploy(self, input_path, output_path):
+    def deploy(self, input_path, output_path, ckpt):
         # Step 1
         if not self.load()[0]:
             raise Exception("No model is found, please train first") 
-        
+    
+        #self.saver.restore(self.sess,ckpt)
         # Apply this to all subjects including the training cases
         # Read from files.log and pick the testing cases for analysis
         all_paths = []
         for dirpath, dirnames, files in os.walk(input_path):
-            if os.path.basename(dirpath)[0:7] == 'Brats17':
+            if os.path.basename(dirpath)[0:7] == 'Brats18':
                 all_paths.append(dirpath)
                 
         for path in all_paths:
@@ -305,6 +310,7 @@ class UNet3D(object):
     def model_dir(self):
         return 'unet3d_layer{}_{}'.format(self.layers, self.loss_type)
     
+    #保存模型
     def save(self, step):
         checkpoint_dir = os.path.join(self.checkpoint_dir, self.model_dir)
         
@@ -312,8 +318,9 @@ class UNet3D(object):
             os.makedirs(checkpoint_dir)
             
         self.saver.save(self.sess, os.path.join(checkpoint_dir, 'unet3d'), global_step=step)
-        
+    #加载/恢复模型    
     def load(self):
+        self.sess.run(tf.global_variables_initializer()) #Attempting to use uninitialized value decoding0/w,初始化变量？
         checkpoint_dir = os.path.join(self.checkpoint_dir, self.model_dir)
         
         ckpt = tf.train.get_checkpoint_state(checkpoint_dir)
@@ -378,7 +385,8 @@ class SurvivalNet(object):
         
         self.loss = tf.losses.mean_squared_error(self.survival, output)
         self.loss_summary = tf.summary.scalar('loss', self.loss)
-            
+    
+    #训练网络        
     def train(self, config):
         optimizer = tf.train.AdamOptimizer().minimize(self.loss)
         
@@ -432,6 +440,7 @@ class SurvivalNet(object):
         self.save(counter)
        
     def deploy(self, input_path, output_path):
+        
         # Step 1
         if not self.load()[0]:
             raise Exception("No model is found, please train first") 
