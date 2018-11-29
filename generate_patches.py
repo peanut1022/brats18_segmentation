@@ -16,7 +16,7 @@ def batch_works(k):
     
     all_paths = [] #path=paths=all_paths == dirpath = input_path + nii.gz
     for dirpath, dirnames, files in os.walk(input_path): 
-        if os.path.basename(dirpath)[0:8] == 'Brats18_': 
+        if os.path.basename(dirpath)[0:7] == 'Brats18': 
             all_paths.append(dirpath) 
     base_locs = generate_patch_locations(patches_per_image, patch_size, image_size)   
     #Multi-process processing  
