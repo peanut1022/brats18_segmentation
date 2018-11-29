@@ -96,7 +96,6 @@ class UNet3D(object):
         self.labels = tf.placeholder(tf.float32, shape=[None, self.patch_size[0], self.patch_size[1], self.patch_size[2],
                                                         self.nclass], name='labels')
         self.is_training = tf.placeholder(tf.bool, name='is_training')
-        #dropout中保留神经元的概率
         self.keep_prob = tf.placeholder(tf.float32, name='dropout_ratio')
         
         conv_size = self.conv_size
