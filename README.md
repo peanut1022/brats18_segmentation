@@ -12,7 +12,9 @@ After training data is downloaded, run `python bias_correction.py` to perform bi
 
 Run `python generate_patches.py` to generate patches for training. Just modify the path of files.</br></br>
 
-To train the model, run `python main.py --train=True --train_data_dir=train_patch_dir`. Or you can modify the default parameters in `main.py` so that you can just run `python main.py`. Check `model.py` for more details about the network structure.<br/></br>
+To train the model, run `python main.py --train=True --train_data_dir=train_patch_dir`. 
+Or you can modify the default parameters in `main.py` so that you can just run `python main.py`. 
+Check `model.py` for more details about the network structure.<br/></br>
 
 To test the model on validation dataset, run `python main.py --train=False --deploy_data_dir=deploy_data_dir --deploy_output_dir=deploy_output_dir`. The results will be saved at `deploy_output_dir`. The network structure for survival prediction is not working good as the result is similar as random guessing. So you can ignore that by setting `run_survival` to `False`.<br/></br>
 
