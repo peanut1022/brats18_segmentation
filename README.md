@@ -10,7 +10,7 @@ This code can run in Ubuntu and windows10.
 The workflow includes bias correction, image fusion, patch extraction, training, post-processing, testing and submission.</br></br>
 
 1. After training data is downloaded, run `python bias_correction.py` to perform bias field correction based on N4ITK (https://www.ncbi.nlm.nih.gov/pubmed/20378467). 
-If you need improve the speed and just run process, you can only one of the 4 modal. But the accuracy may be low. The corrected dataset will be saved at the same folder with the raw dataset as the end of "_corrected.nii.gz". </br></br>.
+If you need improve the speed and just run process, you can only one of the 4 modal. But the accuracy may be low. The corrected dataset will be saved at the same folder with the raw dataset as the end of "_corrected.nii.gz". </br></br>
 
 2. Run 'nii2mat.m' in load_nii,then the mat file will be saved at the same folder. And run 'main_wavelet_brain.m' to fusion 4 modal. Finally, you need run 'mat2nii' in load_nii to get the fusion result.
 
