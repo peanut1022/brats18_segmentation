@@ -30,7 +30,7 @@ Check `model.py` for more details about the network structure.<br/></br>
 The model is implemented and tested using `python 3.6` and `Tensorflow 1.6.0`.
 Other required libraries include: `numpy`, `h5py`, `skimage`, `transforms3d`, `nibabel`, `scipy`, `nipype`. You also need to install `ants` for bias correction. Read the instructions for Nipype (http://nipy.org/nipype/0.9.2/interfaces/generated/nipype.interfaces.ants.segmentation.html) and Ants (http://stnava.github.io/ANTs/) for more information. When you run "bias_correction.py", you may need in ubuntu, because in windows the configuration of ants is inconvenient.
 
-## Contributors
 
+## Contributors
 Jinchang Gong, Department of Biomedical Engineering, University of Shanghai for Science and Technology
 172702180@st.usst.edu.cn
