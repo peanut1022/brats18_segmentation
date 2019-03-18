@@ -7,21 +7,23 @@ A patch-based 3D U-Net model is used. Instead of predicting the class label of t
 ## Code Example
 
 This code can run in Ubuntu and windows10.
-The workflow includes bias correction, patch extraction, training, post-processing, testing and submission.</br></br>
+The workflow includes bias correction, image fusion, patch extraction, training, post-processing, testing and submission.</br></br>
 
-After training data is downloaded, run `python bias_correction.py` to perform bias field correction based on N4ITK (https://www.ncbi.nlm.nih.gov/pubmed/20378467). 
-If you need improve the speed and just run process, you can only one of the 4 modal. But the accuracy may be low. The corrected dataset will be saved at the same folder with the raw dataset as the end of "_corrected.nii.gz". </br></br>
+1. After training data is downloaded, run `python bias_correction.py` to perform bias field correction based on N4ITK (https://www.ncbi.nlm.nih.gov/pubmed/20378467). 
+If you need improve the speed and just run process, you can only one of the 4 modal. But the accuracy may be low. The corrected dataset will be saved at the same folder with the raw dataset as the end of "_corrected.nii.gz". </br></br>.
 
-Run `python generate_patches.py` to generate patches for training. Just modify the path of files. The patches will be saved in output_path</br></br>
+2. Run 'nii2mat.m' in load_nii,then the mat file will be saved at the same folder. And run 'main_wavelet_brain.m' to fusion 4 modal. Finally, you need run 'mat2nii' in load_nii to get the fusion result.
 
-To train the model, run `python main.py`. It will show number of iterations, train_loss and test_loss. 
+3. Run `python generate_patches.py` to generate patches for training. Just modify the path of files. The patches will be saved in output_path</br></br>
+
+4. To train the model, run `python main.py`. It will show number of iterations, train_loss and test_loss. 
 Check `model.py` for more details about the network structure.<br/></br>
 
-To test the model on validation dataset, run `python main.py`. Set the 'train' as 'False'. The results will be saved at `deploy_output_dir`. 
+5. To test the model on validation dataset, run `python main.py`. Set the 'train' as 'False'. The results will be saved at `deploy_output_dir`. 
 
-The network structure for survival prediction is not working good as the result is similar as random guessing. So you can ignore that by setting `run_survival` to `False`.<br/></br>
+6. The network structure for survival prediction is not working good as the result is similar as random guessing. So you can ignore that by setting `run_survival` to `False`.<br/></br>
 
-To combine the results and generate the final label maps, run `python prepare_for_submission.py`.
+7. To combine the results and generate the final label maps, run `python prepare_for_submission.py`.
 
 ## Installation
 
